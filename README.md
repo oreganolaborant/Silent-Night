@@ -10,9 +10,8 @@ Incompatible with Enhanced due to incomplete V2 Lua API.
 
 ## Credits
 - Original script dev [SilentSalo](https://github.com/SilentSalo/SilentNight)
+- [xnightli06x](https://github.com/xnightli06x/Silent-Night)
 - SomeoneSleepy
 - Platindesk
 
-I am not the original creator of this script. Updated the script to work with b3751.0 1.72.
-
-Note: This is the final version. There won't be any updates. I recommend to use Cherax with [Silent Night](https://github.com/SilentSalo/SilentNight)
+I am not the original creator of this script. 

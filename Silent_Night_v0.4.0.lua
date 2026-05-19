@@ -106,6 +106,24 @@ L.HGLs4 = 4718592 + 185951 + 1
 L.HGGs1 = 20054 + 34
 L.HGGs2 = 20054 + 15
 
+-- Cluckin Bell Heist Variables
+L.CBCooldown = "SALV23_CFR_COOLDOWN"
+L.CBInstProg = "MPX_SALV23_INST_PROG"
+
+-- Oscar Guzman Flies Again Variables
+L.OGFAInstBS = "MPX_HACKER24_INST_BS"
+L.OGFAGenBS = "MPX_HACKER24_GEN_BS"
+L.OGFAActiveRob = "MPX_HACKER24_ACTIVE_ROB"
+L.OGFAHardMode = 51272
+L.OGFAMogul1 = 51265
+L.OGFAMogul2 = 51266
+L.OGFAIronMuleStart = 51264
+L.OGFAIronMuleEnd = 51271
+L.OGFAInsurgent = 51260
+L.OGFAWeaponCrate = 51261
+L.OGFAHeavyArmor = 51262
+L.OGFAMogulUpgrade = 51263
+
 -- Agency Variables
 L.AGFl1 = 55789 + 1
 L.AGFl2 = 55789 + 1776 + 1
@@ -2579,31 +2597,253 @@ SN_Autoshop:add_button("Kill Cooldown", function()
 end)
 
 -- Cluckin Bell --
-V.cluckperps = {
-	{ id = 0 , name = "Slush Fund"},
-	{ id = 1 , name = "Breaking and Entering"},
-	{ id = 3 , name = "Concealed Rewards"},
-	{ id = 7 , name = "Hit And Run"},
-	{ id = 15, name = "Disorganized Crime"},
-	{ id = 31, name = "Scene of Crime"}
+local cluckperps = {
+    { id = 0, name = "Slush Fund" },
+    { id = 1, name = "Breaking and Entering" },
+    { id = 3, name = "Concealed Weapons" },
+    { id = 7, name = "Hit and Run" },
+    { id = 15, name = "Disorganized Crime" },
+    { id = 31, name = "Scene of Crime (Finale)" }
 }
 
 local SN_Cluck = SN_FlashOps:add_tab("Cluckin Bell Heist ")
 
-SN_Cluck:add_text("Complete Preps")
+SN_Cluck:add_text("Preps")
 
-for _,cluckprep in ipairs(V.cluckperps) do
-	SN_Cluck:add_button(cluckprep.name,
-	function ()
-		stats.set_int(MPX() .. "SALV23_INST_PROG", cluckprep.id)
-	end)
-	SN_Cluck:add_sameline()
+for _, cluckprep in ipairs(cluckperps) do
+    SN_Cluck:add_button(cluckprep.name, function()
+        stats.set_int(MPX() .. L.CBInstProg, cluckprep.id)
+        gui.show_message("Cluckin Bell", "Set to: " .. cluckprep.name)
+    end)
+    SN_Cluck:add_sameline()
 end
+
 SN_Cluck:add_separator()
-SN_Cluck:add_text("Reset preps")
-SN_Cluck:add_button("Reset Preps",
-function ()
-	stats.set_int(MPX() .. "SALV23_INST_PROG", 0)
+SN_Cluck:add_text("Reset Preps")
+SN_Cluck:add_button("Reset Preps", function()
+    stats.set_int(MPX() .. L.CBInstProg, 0)
+    gui.show_message("Cluckin Bell", "Preps reset")
+end)
+
+SN_Cluck:add_separator()
+SN_Cluck:add_text("Cooldown")
+
+SN_Cluck:add_button("Kill Cooldown", function()
+    tunables.set_int(L.CBCooldown, -1)
+    gui.show_message("Cluckin Bell", "Cooldown killed")
+end)
+
+SN_Cluck:add_separator()
+local approachNames = { "Sneaky Approach", "Aggressive Approach" }
+V.cbApproachIndex = 0
+SN_Cluck:add_imgui(function()
+    ImGui.Text("Approach:")
+    ImGui.SetNextItemWidth(200)
+    local nIndex, changed = ImGui.Combo("##cbApproach", V.cbApproachIndex, approachNames, #approachNames)
+    if changed then
+        V.cbApproachIndex = nIndex
+    end
+end)
+
+SN_Cluck:add_button("Apply Approach", function()
+    local isAggressive = (V.cbApproachIndex == 1)
+    stats.set_packed_stat_bool(42108, isAggressive)
+    gui.show_message("Cluckin Bell", approachNames[V.cbApproachIndex + 1] .. " set")
+end)
+
+SN_Cluck:add_separator()
+
+local weaponNames = {
+    "Compact Rifle, Combat Pistol, Mini SMG, Crowbar, Molotovs",
+    "Heavy Rifle, Tactical SMG, Heavy Shotgun, Pipe Bombs",
+    "MG, AP Pistol, Combat Shotgun, Grenades"
+}
+V.cbWeaponsIndex = 0
+SN_Cluck:add_imgui(function()
+    ImGui.Text("Weapons:")
+    ImGui.SetNextItemWidth(480)
+    local nIndex, changed = ImGui.Combo("##cbWeapons", V.cbWeaponsIndex, weaponNames, #weaponNames)
+    if changed then
+        V.cbWeaponsIndex = nIndex
+    end
+end)
+
+SN_Cluck:add_button("Apply Weapons", function()
+    stats.set_packed_stat_int(51019, V.cbWeaponsIndex)
+    gui.show_message("Cluckin Bell", "Weapon loadout applied: " .. weaponNames[V.cbWeaponsIndex + 1])
+end)
+
+SN_Cluck:add_separator()
+
+local gearNames = {
+    "Marabunta Grande, Light Armor",
+    "The Professionals, Medium Armor",
+    "Military, Heavy Armor"
+}
+V.cbGearIndex = 0
+SN_Cluck:add_imgui(function()
+    ImGui.Text("Gear/Armor:")
+    ImGui.SetNextItemWidth(280)
+    local nIndex, changed = ImGui.Combo("##cbGear", V.cbGearIndex, gearNames, #gearNames)
+    if changed then
+        V.cbGearIndex = nIndex
+    end
+end)
+
+SN_Cluck:add_button("Apply Gear", function()
+    stats.set_packed_stat_int(51021, V.cbGearIndex)
+    gui.show_message("Cluckin Bell", "Gear applied: " .. gearNames[V.cbGearIndex + 1])
+end)
+
+SN_Cluck:add_separator()
+
+local vehicleNames = {
+    "Declasse Tulip",
+    "Declasse Moonbeam Custom",
+    "Declasse Impaler LX",
+    "Ocelot Jugular",
+    "Dinka Sugoi",
+    "Coil Raiden",
+    "Mammoth Patriot Mil-Spec",
+    "Canis Terminus",
+    "Mammoth Squaddie"
+}
+V.cbVehicleIndex = 0
+SN_Cluck:add_imgui(function()
+    ImGui.Text("Getaway Vehicle:")
+    ImGui.SetNextItemWidth(260)
+    local nIndex, changed = ImGui.Combo("##cbVehicle", V.cbVehicleIndex, vehicleNames, #vehicleNames)
+    if changed then
+        V.cbVehicleIndex = nIndex
+    end
+end)
+
+SN_Cluck:add_button("Apply Vehicle", function()
+    stats.set_packed_stat_int(51023, V.cbVehicleIndex)
+    gui.show_message("Cluckin Bell", "Getaway vehicle applied: " .. vehicleNames[V.cbVehicleIndex + 1])
+end)
+
+-- Guzman Flies --
+local SN_Guzman = SN_FlashOps:add_tab("Oscar Guzman Flies Again ")
+local progressNames = {
+    "Reset",
+    "Complete All Preps (Normal)",
+    "Complete All Preps (Hard)"
+}
+V.ogfaProgressIndex = 0
+SN_Guzman:add_imgui(function()
+    ImGui.Text("Progress:")
+    ImGui.SetNextItemWidth(250)
+    local nIndex, changed = ImGui.Combo("##ogfaProgress", V.ogfaProgressIndex, progressNames, #progressNames)
+    if changed then
+        V.ogfaProgressIndex = nIndex
+    end
+end)
+
+SN_Guzman:add_button("Apply Progress", function()
+    local value = V.ogfaProgressIndex
+    if value == 0 then
+        stats.set_int(MPX() .. L.OGFAInstBS, 0)
+        stats.set_int(MPX() .. L.OGFAGenBS, 0)
+        gui.show_message("Oscar Guzman", "Progress reset")
+    elseif value == 1 then
+        stats.set_int(MPX() .. L.OGFAInstBS, -1)
+        stats.set_int(MPX() .. L.OGFAGenBS, -1)
+        gui.show_message("Oscar Guzman", "All preps completed (Normal)")
+    elseif value == 2 then
+        stats.set_int(MPX() .. L.OGFAInstBS, 2047)
+        stats.set_int(MPX() .. L.OGFAGenBS, 2047)
+        gui.show_message("Oscar Guzman", "All preps completed (Hard)")
+    end
+end)
+
+SN_Guzman:add_separator()
+SN_Guzman:add_text("Hard Mode")
+
+V.ogfaHardMode = SN_Guzman:add_checkbox("Enable Hard Mode")
+
+SN_Guzman:add_separator()
+SN_Guzman:add_text("Additional Equipment & Upgrades")
+
+V.ogfaMogul = SN_Guzman:add_checkbox("Additional Mogul")
+V.ogfaIronMule = SN_Guzman:add_checkbox("Additional Iron Mules")
+
+SN_Guzman:add_separator()
+SN_Guzman:add_text("Ammunition & Upgrades")
+
+V.ogfaInsurgent = SN_Guzman:add_checkbox("Insurgent Pick-Up Custom")
+V.ogfaWeaponCrate = SN_Guzman:add_checkbox("Weapon Crate")
+V.ogfaHeavyArmor = SN_Guzman:add_checkbox("Heavy Armor")
+V.ogfaMogulUpgrade = SN_Guzman:add_checkbox("Mogul Upgrade")
+
+SN_Guzman:add_separator()
+SN_Guzman:add_button("Apply", function()
+    stats.set_packed_stat_bool(L.OGFAHardMode, V.ogfaHardMode:is_enabled())
+    stats.set_packed_stat_bool(L.OGFAMogul1, V.ogfaMogul:is_enabled())
+    stats.set_packed_stat_bool(L.OGFAMogul2, V.ogfaMogul:is_enabled())
+    for i = L.OGFAIronMuleStart, L.OGFAIronMuleEnd do
+        if i ~= 51267 then
+            stats.set_packed_stat_bool(i, V.ogfaIronMule:is_enabled())
+        end
+    end
+    stats.set_packed_stat_bool(L.OGFAInsurgent, V.ogfaInsurgent:is_enabled())
+    stats.set_packed_stat_bool(L.OGFAWeaponCrate, V.ogfaWeaponCrate:is_enabled())
+    stats.set_packed_stat_bool(L.OGFAHeavyArmor, V.ogfaHeavyArmor:is_enabled())
+    stats.set_packed_stat_bool(L.OGFAMogulUpgrade, V.ogfaMogulUpgrade:is_enabled())
+    gui.show_message("Oscar Guzman", "All settings applied")
+end)
+
+SN_Guzman:add_button("Max Settings", function()
+    stats.set_packed_stat_bool(L.OGFAMogul1, true)
+    stats.set_packed_stat_bool(L.OGFAMogul2, true)
+    for i = L.OGFAIronMuleStart, L.OGFAIronMuleEnd do
+        if i ~= 51267 then
+            stats.set_packed_stat_bool(i, true)
+        end
+    end
+    stats.set_packed_stat_bool(L.OGFAInsurgent, true)
+    stats.set_packed_stat_bool(L.OGFAWeaponCrate, true)
+    stats.set_packed_stat_bool(L.OGFAHeavyArmor, true)
+    stats.set_packed_stat_bool(L.OGFAMogulUpgrade, true)
+    stats.set_packed_stat_bool(L.OGFAHardMode, true)
+    
+    V.ogfaHardMode:set_enabled(true)
+    V.ogfaMogul:set_enabled(true)
+    V.ogfaIronMule:set_enabled(true)
+    V.ogfaInsurgent:set_enabled(true)
+    V.ogfaWeaponCrate:set_enabled(true)
+    V.ogfaHeavyArmor:set_enabled(true)
+    V.ogfaMogulUpgrade:set_enabled(true)
+    
+    gui.show_message("Oscar Guzman", "All upgrades and hard mode applied")
+end)
+
+SN_Guzman:add_separator()
+SN_Guzman:add_text("Reset")
+
+SN_Guzman:add_button("Reset All Settings", function()
+    stats.set_packed_stat_bool(L.OGFAHardMode, false)
+    stats.set_packed_stat_bool(L.OGFAMogul1, false)
+    stats.set_packed_stat_bool(L.OGFAMogul2, false)
+    for i = L.OGFAIronMuleStart, L.OGFAIronMuleEnd do
+        if i ~= 51267 then
+            stats.set_packed_stat_bool(i, false)
+        end
+    end
+    stats.set_packed_stat_bool(L.OGFAInsurgent, false)
+    stats.set_packed_stat_bool(L.OGFAWeaponCrate, false)
+    stats.set_packed_stat_bool(L.OGFAHeavyArmor, false)
+    stats.set_packed_stat_bool(L.OGFAMogulUpgrade, false)
+    
+    V.ogfaHardMode:set_enabled(false)
+    V.ogfaMogul:set_enabled(false)
+    V.ogfaIronMule:set_enabled(false)
+    V.ogfaInsurgent:set_enabled(false)
+    V.ogfaWeaponCrate:set_enabled(false)
+    V.ogfaHeavyArmor:set_enabled(false)
+    V.ogfaMogulUpgrade:set_enabled(false)
+    
+    gui.show_message("Oscar Guzman", "All settings reset")
 end)
 
 -- Business Tool --

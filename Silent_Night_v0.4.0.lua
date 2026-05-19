@@ -3362,6 +3362,19 @@ SN_BailOffice:add_text("Note: Do that outside Bail Office")
 
 -- Money Tool --
 local SN_MoneyT = Silent:add_tab("Money Tool ")
+SN_MoneyT:add_text("Money Remover")
+
+local moneyAmount = SN_MoneyT:add_input_int("")
+moneyAmount:set_value(0)
+SN_MoneyT:add_button("Remove Amount", function()
+    local amount = moneyAmount:get_value()
+    if amount > 0 then
+        globals.set_int(2708554 + 36, amount)
+        gui.show_message("Money Tool", "Removed: $" .. amount)
+    else
+        gui.show_message("Money Tool", "Enter an amount first")
+    end
+end)
 
 -- Casino --
 V.CasinoPrizes = {
@@ -3572,78 +3585,9 @@ script.register_looped("680kTransaction", function(script)
     end
 end)
 
-SN_MoneyT:add_separator()
-SN_MoneyT:add_text("Bank Transactions")
-
-SN_MoneyT:add_button("Deposit All Cash", function()
-    local charSlot = stats.get_int("MPPLY_LAST_MP_CHAR")
-    local walletMoney = NETSHOPPING.NETWORK_GET_VC_WALLET_BALANCE(charSlot)
-    if walletMoney > 0 then
-        NETSHOPPING.NET_GAMESERVER_TRANSFER_WALLET_TO_BANK(charSlot, walletMoney)
-        gui.show_message("Money Tool", "Deposited: $" .. walletMoney)
-    else
-        gui.show_message("Money Tool", "No cash to deposit")
-    end
-end)
-
-SN_MoneyT:add_sameline()
-SN_MoneyT:add_button("Withdraw All Cash", function()
-    local charSlot = stats.get_int("MPPLY_LAST_MP_CHAR")
-    local bankMoney = NETSHOPPING.NETWORK_GET_VC_BANK_BALANCE()
-    if bankMoney > 0 then
-        NETSHOPPING.NET_GAMESERVER_TRANSFER_BANK_TO_WALLET(charSlot, bankMoney)
-        gui.show_message("Money Tool", "Withdrawn: $" .. bankMoney)
-    else
-        gui.show_message("Money Tool", "No money in bank")
-    end
-end)
-
-SN_MoneyT:add_separator()
-SN_MoneyT:add_text("Money Amount Editor")
-
-local moneyAmount = SN_MoneyT:add_input_int("Amount")
-moneyAmount:set_value(0)
-
-SN_MoneyT:add_button("Deposit Amount", function()
-    local amount = moneyAmount:get_value()
-    if amount > 0 then
-        local charSlot = stats.get_int("MPPLY_LAST_MP_CHAR")
-        local walletMoney = NETSHOPPING.NETWORK_GET_VC_WALLET_BALANCE(charSlot)
-        local depositAmount = (amount > walletMoney) and walletMoney or amount
-        NETSHOPPING.NET_GAMESERVER_TRANSFER_WALLET_TO_BANK(charSlot, depositAmount)
-        gui.show_message("Money Tool", "Deposited: $" .. depositAmount)
-    else
-        gui.show_message("Money Tool", "Enter an amount first")
-    end
-end)
-
-SN_MoneyT:add_sameline()
-SN_MoneyT:add_button("Withdraw Amount", function()
-    local amount = moneyAmount:get_value()
-    if amount > 0 then
-        local charSlot = stats.get_int("MPPLY_LAST_MP_CHAR")
-        local bankMoney = NETSHOPPING.NETWORK_GET_VC_BANK_BALANCE()
-        local withdrawAmount = (amount > bankMoney) and bankMoney or amount
-        NETSHOPPING.NET_GAMESERVER_TRANSFER_BANK_TO_WALLET(charSlot, withdrawAmount)
-        gui.show_message("Money Tool", "Withdrawn: $" .. withdrawAmount)
-    else
-        gui.show_message("Money Tool", "Enter an amount first")
-    end
-end)
-
-SN_MoneyT:add_sameline()
-SN_MoneyT:add_button("Remove Amount", function()
-    local amount = moneyAmount:get_value()
-    if amount > 0 then
-        globals.set_int(2708554 + 36, amount)
-        gui.show_message("Money Tool", "Removed: $" .. amount)
-    else
-        gui.show_message("Money Tool", "Enter an amount first")
-    end
-end)
-
 -- Miscellaneous --
 local SN_Miscellaneous = Silent:add_tab("Miscellaneous ")
+
 -- Vehicle Utilities --
 function FastAcc(speed)
 	V.vehicle = PED.GET_VEHICLE_PED_IS_IN(PLAYER.PLAYER_PED_ID(), true)

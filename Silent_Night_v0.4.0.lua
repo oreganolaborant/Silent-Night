@@ -262,8 +262,8 @@ local function null() end
 
 
 -- Silent Night Tab
-Silent = gui.get_tab("Silent Night 1.72")
-Silent:add_text("Silent Night 1.72")
+Silent = gui.get_tab("Silent Night v0.4.0")
+Silent:add_text("Silent Night v0.4.0")
 Silent:add_text("YOUR RP LEVEL IS " .. stats.get_int(joaat(MPX() .. "CHAR_RANK_FM")))
 Silent:add_text("YOUR CREW RANK IS " .. stats.get_int(joaat("MPPLY_CURRENT_CREW_RANK")))
 
@@ -401,9 +401,9 @@ function()
 		gui.show_message("ERROR", "YOUR RP LEVEL ".. V.level:get_value() .. " CANNOT BE SET BECAUSE IT IS ABOVE LIMIT")
 	else
 		for i = 0, 4 do
-			stats.set_int("MPPLY_CREW_LOCAL_XP_" .. i, rp[V.level:get_value()])
+			stats.set_int("MPPLY_CREW_LOCAL_XP_" .. i, ranks[V.level:get_value()])
 		end
-		gui.show_message("CREW RANK HAS BEEN SET TO " .. rp[V.level:get_value()] .. " SUCCESSFULY", "CHANGING SESSION TO GET THE CREW RANK")
+		gui.show_message("CREW RANK HAS BEEN SET TO " .. ranks[V.level:get_value()] .. " SUCCESSFULY", "CHANGING SESSION TO GET THE CREW RANK")
 		changeSession(8)
 	end
 end)
@@ -2609,204 +2609,7 @@ end)
 -- Business Tool --
 local SN_Business = Silent:add_tab("Business Tool ")
 
--- Bunker --
-local SN_Bunker = SN_Business:add_tab("Bunker ")
-SN_Bunker:add_text("Fill Bunker With Supplies")
-SN_Bunker:add_button("Get Supplies", function()
-    globals.set_int(L.GSIg, 1)
-    gui.show_message("Bunker", "Supplies should've been received")
-end)
-SN_Bunker:add_button("Open Laptop", function()
-    SCRIPT.REQUEST_SCRIPT("appbunkerbusiness")
-    SYSTEM.START_NEW_SCRIPT("appbunkerbusiness", 4592)
-	gui.show_message("Bunker", "Laptop screen should've been opened")
-end)
-
-SN_Bunker:add_separator()
-
-SN_Bunker:add_text("Unlock All Research temporarily")
-
-SN_Bunker:add_button("Unlock All Research", function()
-	script.run_in_fiber(function(script)
-		globals.set_int(L.FMg + 21653, 1)
-		gui.show_message("Bunker Research", "ALL Bunker research has been unlocked.")
-	end)
-end)
-SN_Bunker:add_text("Supplies")
-SN_Bunker:add_button("Trigger Production", function()
-    globals.set_int(L.BCFp1, 0)
-    globals.set_int(L.BCFp2, 1)
-    gui.show_message("Bunker", "Production should've been triggered")
-end)
-SN_Bunker:add_sameline()
-V.bSupplies = SN_Bunker:add_checkbox("Resupply Bunker (Looped)")
-script.register_looped("autoGetBunkerCargo", function(script)
-    script:yield()
-    if V.bSupplies:is_enabled() == true then
-        autoGetBunkerCargo = not autoGetBunkerCargo
-        if autoGetBunkerCargo then
-            globals.set_int(L.GSIg, 1)
-            gui.show_message("Bunker", "Resupplying your bunker supplies every 5 seconds.")
-            script:sleep(500)
-        end
-    end
-end)
-SN_Bunker:add_text("Instant Finish Sell Missions")
-SN_Bunker:add_button("Instant Sell Supplies",
-function ()
-	locals.set_int("gb_gunrunning", L.BCISl, 0)
-	gui.show_message("Bunker", "Sell mission should've been finished")
-end)
-
-V.bunkerMaxPrice = SN_Bunker:add_checkbox("Maximize Price (CAUTION)")
-V.bunkerNoXP = SN_Bunker:add_checkbox("No XP Gain")
-
-script.register_looped("bunker_max_price", function()
-    if V.bunkerMaxPrice:is_enabled() then
-        V.productTotal = stats.get_int(MPX() .. "PRODTOTALFORFACTORY5")
-        if V.productTotal > 0 then
-            V.pricePerUnit = math.floor((2500000 / 1.5) / V.productTotal)
-            tunables.set_int("GR_MANU_PRODUCT_VALUE", V.pricePerUnit)
-            tunables.set_int("GR_MANU_PRODUCT_VALUE_STAFF_UPGRADE", 0)
-            tunables.set_int("GR_MANU_PRODUCT_VALUE_EQUIPMENT_UPGRADE", 0)
-        end
-    else
-        tunables.set_int("GR_MANU_PRODUCT_VALUE", 5000)
-        tunables.set_int("GR_MANU_PRODUCT_VALUE_STAFF_UPGRADE", 1000)
-        tunables.set_int("GR_MANU_PRODUCT_VALUE_EQUIPMENT_UPGRADE", 1000)
-    end
-    
-    if V.bunkerNoXP:is_enabled() then
-        globals.set_float(L.XMg, 0)
-    else
-        globals.set_float(L.XMg, 1)
-    end
-end)
-
--- MC Businesses
-local SN_MB = SN_Business:add_tab("MC Businesses ")
-SN_MB:add_text("Resupply All Businesses")
-SN_MB:add_button("Resupply All", function()
-	script.run_in_fiber(function(mcResupply)
-		globals.set_int(1673807 + 1 + 6, 1)
-		globals.set_int(1673807 + 1 + 6, 1)
-		globals.set_int(1673807 + 1 + 6, 1) -- Acid Lab Supplies
-		gui.show_message("Acid Lab", "Resupplying your Acid Lab")
-		globals.set_int(1673807 + 1 + 5, 1)
-		globals.set_int(1673807 + 1 + 5, 1)
-		globals.set_int(1673807 + 1 + 5, 1) -- Bunker Supplies
-		gui.show_message("Bunker", "Resupplying your Bunker")
-		globals.set_int(1673807 + 1 + 0, 1)
-		globals.set_int(1673807 + 1 + 0, 1)
-		globals.set_int(1673807 + 1 + 0, 1) -- Counterfeit Cash Factory Supplies
-		gui.show_message("Counterfeit Cash Factory", "Resupplying your Counterfeit Cash Factory")
-		globals.set_int(1673807 + 1 + 1, 1)
-		globals.set_int(1673807 + 1 + 1, 1)
-		globals.set_int(1673807 + 1 + 1, 1) -- Document Forge Supplies
-		gui.show_message("Document Forge", "Resupplying your Document Forge")
-		globals.set_int(1673807 + 1 + 2, 1)
-		globals.set_int(1673807 + 1 + 2, 1)
-		globals.set_int(1673807 + 1 + 2, 1) -- Weed Farm Supplies
-		gui.show_message("Weed Farm", "Resupplying your Weed Farm")
-		globals.set_int(1673807 + 1 + 3, 1)
-		globals.set_int(1673807 + 1 + 3, 1)
-		globals.set_int(1673807 + 1 + 3, 1) -- Meth Lab Suplies
-		gui.show_message("Meth Lab", "Resupplying your Meth Lab")
-		globals.set_int(1673807 + 1 + 4, 1)
-		globals.set_int(1673807 + 1 + 4, 1)
-		globals.set_int(1673807 + 1 + 4, 1) -- Cocaine Lockup Supplies
-		gui.show_message("Cocaine Lockup", "Resupplying your Cocaine Lockup")
-	end)
-end)
-SN_MB:add_separator()
-SN_MB:add_text("Raise Value of Product of MC Business to $1,000,000 +")
-SN_MB:add_button("Raise Sale Prices", function()
-    globals.set_int(L.MCPwv, 15000) -- price for weed
-    globals.set_int(L.MCPmV, 60000) -- price for meth
-    globals.set_int(L.MCPcockV, 100000) -- price for cocaine
-    globals.set_int(L.MCPfakeV, 20000) -- price for document forge
-    globals.set_int(L.MCPcashV, 30000) -- price for cash
-	globals.set_int(L.MCPacidV, 6000) --price for acid
-    gui.show_message("Production Value", "Production sale value has been increased for all businesses")
-end)
--- Hangar Cargo --
-
-local SN_Hangar = SN_Business:add_tab("Hangar Cargo ")
-SN_Hangar:add_text("Supplies")
-SN_Hangar:add_button("Tell Rooster to get some cargo supplies",
-function ()
-	stats.set_packed_stat_bool(36828, true)
-end)
-SN_Hangar:add_button("Open Laptop", function()
-    SCRIPT.REQUEST_SCRIPT("appsmuggler")
-    SYSTEM.START_NEW_SCRIPT("appsmuggler", 4592)
-	gui.show_message("Hangar Cargo", "Laptop screen should've been opened")
-end)
-
-V.hangarloop = SN_Hangar:add_checkbox("Hangar Loop")
-script.register_looped("hangarloop",
-	function (script)
-		if V.hangarloop:is_enabled() then
-			script:yield()
-			stats.set_packed_stat_bool(36828, true)
-			script:sleep(100)
-		end
-	end
-)
-SN_Hangar:add_separator()
-V.hangarMaxPrice = SN_Hangar:add_checkbox("Maximize Price")
-script.register_looped("HangarPriceToggler", function(script)
-    if V.hangarMaxPrice:is_enabled() then
-        if stats.get_int(MPX() .. "HANGAR_CONTRABAND_TOTAL") < 4 then
-            stats.set_packed_stat_bool(36828, true)
-            script:sleep(1000)
-        end
-        
-        V.totalCrates = stats.get_int(MPX() .. "HANGAR_CONTRABAND_TOTAL")
-        if V.totalCrates > 0 then
-            V.pricePerCrate = math.floor(4000000 / V.totalCrates)
-            tunables.set_int("SMUG_SELL_PRICE_PER_CRATE_MIXED", V.pricePerCrate)
-            tunables.set_float("SMUG_SELL_RONS_CUT", 0.0)
-        end
-    else
-        tunables.set_int("SMUG_SELL_PRICE_PER_CRATE_MIXED", 30000)
-        tunables.set_float("SMUG_SELL_RONS_CUT", 0.025)
-    end
-    script:sleep(1000)
-end)
-SN_Hangar:add_separator()
-V.HangarCargo = 0
-SN_Hangar:add_text("Instant Finish Air Cargo Sell Missions")
-SN_Hangar:add_button("Instant Air Cargo Sell", function()
-    locals.set_int("gb_smuggler", L.HCVISl2, locals.get_int("gb_smuggler", L.HCVISl1))
-    gui.show_message("Hangar Sell", "Sell mission should've been finished")
-end)
-V.hangarMaxPrice = SN_Hangar:add_checkbox("Maximize Price (CAUTION)")
-
-script.register_looped("hangar_max_price", function()
-    if V.hangarMaxPrice:is_enabled() then
-        V.totalCrates = stats.get_int(MPX() .. "HANGAR_CONTRABAND_TOTAL")
-        if V.totalCrates > 0 then
-            V.pricePerCrate = math.floor(4000000 / V.totalCrates)
-            tunables.set_int("SMUG_SELL_PRICE_PER_CRATE_MIXED", V.pricePerCrate)
-            tunables.set_float("SMUG_SELL_RONS_CUT", 0.0)
-        end
-    else
-        tunables.set_int("SMUG_SELL_PRICE_PER_CRATE_MIXED", 30000)
-        tunables.set_float("SMUG_SELL_RONS_CUT", 0.025)
-    end
-end)
-
-V.hangarSupplier = SN_Hangar:add_checkbox("Turkish Supplier (Auto-Resupply)")
-
-script.register_looped("hangar_turkish_supplier", function()
-    if V.hangarSupplier:is_enabled() then
-        stats.set_packed_stat_bool(36828, true)
-        script:sleep(5000)
-    end
-end)
-
--- Night Loop --
+-- Nightclub --
 local SN_Nightclub = SN_Business:add_tab("Nightclub ")
 SN_Nightclub:add_text("Nightclub Loop")
 V.safeloop = SN_Nightclub:add_checkbox("Enable Nightclub $250k Loop")
@@ -2931,77 +2734,156 @@ SN_Nightclub:add_button("Open Computer", function()
 	gui.show_message("Nightclub", "Computer screen should've been opened")
 end)
 
--- Arcade loop - 
-local SN_arcade = SN_Business:add_tab("Arcade ")
-V.arcadeSafe = SN_arcade:add_checkbox("Arcade Safe Loop")
-script.register_looped("arcadeloop", function(script)
+-- Bunker --
+local SN_Bunker = SN_Business:add_tab("Bunker ")
+SN_Bunker:add_text("Fill Bunker With Supplies")
+SN_Bunker:add_button("Get Supplies", function()
+    globals.set_int(L.GSIg, 1)
+    gui.show_message("Bunker", "Supplies should've been received")
+end)
+SN_Bunker:add_button("Open Laptop", function()
+    SCRIPT.REQUEST_SCRIPT("appbunkerbusiness")
+    SYSTEM.START_NEW_SCRIPT("appbunkerbusiness", 4592)
+	gui.show_message("Bunker", "Laptop screen should've been opened")
+end)
+
+SN_Bunker:add_separator()
+
+SN_Bunker:add_text("Unlock All Research temporarily")
+
+SN_Bunker:add_button("Unlock All Research", function()
+	script.run_in_fiber(function(script)
+		globals.set_int(L.FMg + 21653, 1)
+		gui.show_message("Bunker Research", "ALL Bunker research has been unlocked.")
+	end)
+end)
+SN_Bunker:add_text("Supplies")
+SN_Bunker:add_button("Trigger Production", function()
+    globals.set_int(L.BCFp1, 0)
+    globals.set_int(L.BCFp2, 1)
+    gui.show_message("Bunker", "Production should've been triggered")
+end)
+SN_Bunker:add_sameline()
+V.bSupplies = SN_Bunker:add_checkbox("Resupply Bunker (Looped)")
+script.register_looped("autoGetBunkerCargo", function(script)
     script:yield()
-    if V.arcadeSafe:is_enabled() == true then
-        gui.show_message("Arcade", "Supplying Arcade Safe with money")
-        STATS.STAT_SET_INT(joaat(MPX() .. "ARCADE_SAFE_CASH_VALUE"), 2000, true)
-        STATS.STAT_SET_INT(joaat(MPX() .. "ARCADE_PAY_TIME_LEFT"), -1, true)
+    if V.bSupplies:is_enabled() == true then
+        autoGetBunkerCargo = not autoGetBunkerCargo
+        if autoGetBunkerCargo then
+            globals.set_int(L.GSIg, 1)
+            gui.show_message("Bunker", "Resupplying your bunker supplies every 5 seconds.")
+            script:sleep(500)
+        end
+    end
+end)
+SN_Bunker:add_text("Instant Finish Sell Missions")
+SN_Bunker:add_button("Instant Sell Supplies",
+function ()
+	locals.set_int("gb_gunrunning", L.BCISl, 0)
+	gui.show_message("Bunker", "Sell mission should've been finished")
+end)
+
+V.bunkerMaxPrice = SN_Bunker:add_checkbox("Maximize Price (CAUTION)")
+V.bunkerNoXP = SN_Bunker:add_checkbox("No XP Gain")
+
+script.register_looped("bunker_max_price", function()
+    if V.bunkerMaxPrice:is_enabled() then
+        V.productTotal = stats.get_int(MPX() .. "PRODTOTALFORFACTORY5")
+        if V.productTotal > 0 then
+            V.pricePerUnit = math.floor((2500000 / 1.5) / V.productTotal)
+            tunables.set_int("GR_MANU_PRODUCT_VALUE", V.pricePerUnit)
+            tunables.set_int("GR_MANU_PRODUCT_VALUE_STAFF_UPGRADE", 0)
+            tunables.set_int("GR_MANU_PRODUCT_VALUE_EQUIPMENT_UPGRADE", 0)
+        end
+    else
+        tunables.set_int("GR_MANU_PRODUCT_VALUE", 5000)
+        tunables.set_int("GR_MANU_PRODUCT_VALUE_STAFF_UPGRADE", 1000)
+        tunables.set_int("GR_MANU_PRODUCT_VALUE_EQUIPMENT_UPGRADE", 1000)
+    end
+    
+    if V.bunkerNoXP:is_enabled() then
+        globals.set_float(L.XMg, 0)
+    else
+        globals.set_float(L.XMg, 1)
+    end
+end)
+
+-- Hangar Cargo --
+
+local SN_Hangar = SN_Business:add_tab("Hangar Cargo ")
+SN_Hangar:add_text("Supplies")
+SN_Hangar:add_button("Tell Rooster to get some cargo supplies",
+function ()
+	stats.set_packed_stat_bool(36828, true)
+end)
+SN_Hangar:add_button("Open Laptop", function()
+    SCRIPT.REQUEST_SCRIPT("appsmuggler")
+    SYSTEM.START_NEW_SCRIPT("appsmuggler", 4592)
+	gui.show_message("Hangar Cargo", "Laptop screen should've been opened")
+end)
+
+V.hangarloop = SN_Hangar:add_checkbox("Hangar Loop")
+script.register_looped("hangarloop",
+	function (script)
+		if V.hangarloop:is_enabled() then
+			script:yield()
+			stats.set_packed_stat_bool(36828, true)
+			script:sleep(100)
+		end
+	end
+)
+SN_Hangar:add_separator()
+V.hangarMaxPrice = SN_Hangar:add_checkbox("Maximize Price")
+script.register_looped("HangarPriceToggler", function(script)
+    if V.hangarMaxPrice:is_enabled() then
+        if stats.get_int(MPX() .. "HANGAR_CONTRABAND_TOTAL") < 4 then
+            stats.set_packed_stat_bool(36828, true)
+            script:sleep(1000)
+        end
+        
+        V.totalCrates = stats.get_int(MPX() .. "HANGAR_CONTRABAND_TOTAL")
+        if V.totalCrates > 0 then
+            V.pricePerCrate = math.floor(4000000 / V.totalCrates)
+            tunables.set_int("SMUG_SELL_PRICE_PER_CRATE_MIXED", V.pricePerCrate)
+            tunables.set_float("SMUG_SELL_RONS_CUT", 0.0)
+        end
+    else
+        tunables.set_int("SMUG_SELL_PRICE_PER_CRATE_MIXED", 30000)
+        tunables.set_float("SMUG_SELL_RONS_CUT", 0.025)
+    end
+    script:sleep(1000)
+end)
+SN_Hangar:add_separator()
+V.HangarCargo = 0
+SN_Hangar:add_text("Instant Finish Air Cargo Sell Missions")
+SN_Hangar:add_button("Instant Air Cargo Sell", function()
+    locals.set_int("gb_smuggler", L.HCVISl2, locals.get_int("gb_smuggler", L.HCVISl1))
+    gui.show_message("Hangar Sell", "Sell mission should've been finished")
+end)
+V.hangarMaxPrice = SN_Hangar:add_checkbox("Maximize Price (CAUTION)")
+
+script.register_looped("hangar_max_price", function()
+    if V.hangarMaxPrice:is_enabled() then
+        V.totalCrates = stats.get_int(MPX() .. "HANGAR_CONTRABAND_TOTAL")
+        if V.totalCrates > 0 then
+            V.pricePerCrate = math.floor(4000000 / V.totalCrates)
+            tunables.set_int("SMUG_SELL_PRICE_PER_CRATE_MIXED", V.pricePerCrate)
+            tunables.set_float("SMUG_SELL_RONS_CUT", 0.0)
+        end
+    else
+        tunables.set_int("SMUG_SELL_PRICE_PER_CRATE_MIXED", 30000)
+        tunables.set_float("SMUG_SELL_RONS_CUT", 0.025)
+    end
+end)
+
+V.hangarSupplier = SN_Hangar:add_checkbox("Turkish Supplier (Auto-Resupply)")
+
+script.register_looped("hangar_turkish_supplier", function()
+    if V.hangarSupplier:is_enabled() then
+        stats.set_packed_stat_bool(36828, true)
         script:sleep(5000)
     end
 end)
-SN_arcade:add_separator()
-SN_arcade:add_button("Collect Arcade Safe", function()
-    V.safeValue = stats.get_int(MPX() .. "ARCADE_SAFE_CASH_VALUE")
-    if V.safeValue > 0 then
-        locals.set_int("am_mp_arcade", 133 + 144, 1)
-        gui.show_message("Diamond Casino Heist", "Safe money collected")
-    else
-        gui.show_message("Diamond Casino Heist", "Arcade safe is empty")
-    end
-end)
-
--- Garment Factory --
-local SN_Garment = SN_Business:add_tab("Garment Factory ")
-SN_Garment:add_text("Garment Factory")
-
-SN_Garment:add_button("Collect Safe", function()
-    V.safeValue = stats.get_int(MPX() .. "HDEN24_SAFE_CASH_VALUE")
-    if V.safeValue > 0 then
-        -- Collect safe logic
-        gui.show_message("Garment Factory", "Safe money collected: $" .. V.safeValue)
-    else
-        gui.show_message("Garment Factory", "Safe is empty")
-    end
-end)
-
-SN_Garment:add_button("Unbrick Computer", function()
-    stats.set_int(MPX() .. "HACKER24_GEN_BS", -24607)
-    gui.show_message("Garment Factory", "Computer unbricked")
-end)
-
-SN_Garment:add_button("Skip Setup", function()
-    stats.set_int(MPX() .. "HACKER24_GEN_BS", -1)
-    gui.show_message("Garment Factory", "Setup skipped. Change session to apply")
-end)
-
--- Bail Office --
-local SN_BailOffice = SN_Business:add_tab("Bail Office ")
-
-SN_BailOffice:add_button("Collect Safe", function()
-    V.safeValue = stats.get_int(MPX() .. "BAIL_SAFE_CASH_VALUE")
-    if V.safeValue > 0 then
-        gui.show_message("Bail Office", "Safe money collected: $" .. V.safeValue)
-    else
-        gui.show_message("Bail Office", "Safe is empty")
-    end
-end)
-SN_BailOffice:add_button("All to Max Payout",
-function ()
-	stats.set_int(MPX() .. "BOUNTY24_STD_TARG_RWD_0", 90000)
-	stats.set_int(MPX() .. "BOUNTY24_STD_TARG_RWD_1", 90000)
-	stats.set_int(MPX() .. "BOUNTY24_STD_TARG_RWD_2", 90000)
-end)
-SN_BailOffice:add_button("Free All Prisoners", function()
-    stats.set_int(MPX() .. "BAIL_PRISONER_POSIX0", 0)
-    stats.set_int(MPX() .. "BAIL_PRISONER_POSIX1", 0)
-    stats.set_int(MPX() .. "BAIL_PRISONER_POSIX2", 0)
-    gui.show_message("Bail Office", "All prisoners freed")
-end)
-SN_BailOffice:add_text("Note: Do that outside Bail Office")
 
 -- Special Cargo --
 local SN_Special = SN_Business:add_tab("Special Cargo ")
@@ -3118,6 +3000,125 @@ function()
 		end
 	)
 end)
+
+-- MC Businesses
+local SN_MB = SN_Business:add_tab("MC Businesses ")
+SN_MB:add_text("Resupply All Businesses")
+SN_MB:add_button("Resupply All", function()
+	script.run_in_fiber(function(mcResupply)
+		globals.set_int(1673807 + 1 + 6, 1)
+		globals.set_int(1673807 + 1 + 6, 1)
+		globals.set_int(1673807 + 1 + 6, 1) -- Acid Lab Supplies
+		gui.show_message("Acid Lab", "Resupplying your Acid Lab")
+		globals.set_int(1673807 + 1 + 5, 1)
+		globals.set_int(1673807 + 1 + 5, 1)
+		globals.set_int(1673807 + 1 + 5, 1) -- Bunker Supplies
+		gui.show_message("Bunker", "Resupplying your Bunker")
+		globals.set_int(1673807 + 1 + 0, 1)
+		globals.set_int(1673807 + 1 + 0, 1)
+		globals.set_int(1673807 + 1 + 0, 1) -- Counterfeit Cash Factory Supplies
+		gui.show_message("Counterfeit Cash Factory", "Resupplying your Counterfeit Cash Factory")
+		globals.set_int(1673807 + 1 + 1, 1)
+		globals.set_int(1673807 + 1 + 1, 1)
+		globals.set_int(1673807 + 1 + 1, 1) -- Document Forge Supplies
+		gui.show_message("Document Forge", "Resupplying your Document Forge")
+		globals.set_int(1673807 + 1 + 2, 1)
+		globals.set_int(1673807 + 1 + 2, 1)
+		globals.set_int(1673807 + 1 + 2, 1) -- Weed Farm Supplies
+		gui.show_message("Weed Farm", "Resupplying your Weed Farm")
+		globals.set_int(1673807 + 1 + 3, 1)
+		globals.set_int(1673807 + 1 + 3, 1)
+		globals.set_int(1673807 + 1 + 3, 1) -- Meth Lab Suplies
+		gui.show_message("Meth Lab", "Resupplying your Meth Lab")
+		globals.set_int(1673807 + 1 + 4, 1)
+		globals.set_int(1673807 + 1 + 4, 1)
+		globals.set_int(1673807 + 1 + 4, 1) -- Cocaine Lockup Supplies
+		gui.show_message("Cocaine Lockup", "Resupplying your Cocaine Lockup")
+	end)
+end)
+SN_MB:add_separator()
+SN_MB:add_text("Raise Value of Product of MC Business to $1,000,000 +")
+SN_MB:add_button("Raise Sale Prices", function()
+    globals.set_int(L.MCPwv, 15000) -- price for weed
+    globals.set_int(L.MCPmV, 60000) -- price for meth
+    globals.set_int(L.MCPcockV, 100000) -- price for cocaine
+    globals.set_int(L.MCPfakeV, 20000) -- price for document forge
+    globals.set_int(L.MCPcashV, 30000) -- price for cash
+	globals.set_int(L.MCPacidV, 6000) --price for acid
+    gui.show_message("Production Value", "Production sale value has been increased for all businesses")
+end)
+
+-- Arcade loop - 
+local SN_arcade = SN_Business:add_tab("Arcade ")
+V.arcadeSafe = SN_arcade:add_checkbox("Arcade Safe Loop")
+script.register_looped("arcadeloop", function(script)
+    script:yield()
+    if V.arcadeSafe:is_enabled() == true then
+        gui.show_message("Arcade", "Supplying Arcade Safe with money")
+        STATS.STAT_SET_INT(joaat(MPX() .. "ARCADE_SAFE_CASH_VALUE"), 2000, true)
+        STATS.STAT_SET_INT(joaat(MPX() .. "ARCADE_PAY_TIME_LEFT"), -1, true)
+        script:sleep(5000)
+    end
+end)
+SN_arcade:add_separator()
+SN_arcade:add_button("Collect Arcade Safe", function()
+    V.safeValue = stats.get_int(MPX() .. "ARCADE_SAFE_CASH_VALUE")
+    if V.safeValue > 0 then
+        locals.set_int("am_mp_arcade", 133 + 144, 1)
+        gui.show_message("Diamond Casino Heist", "Safe money collected")
+    else
+        gui.show_message("Diamond Casino Heist", "Arcade safe is empty")
+    end
+end)
+
+-- Garment Factory --
+local SN_Garment = SN_Business:add_tab("Garment Factory ")
+SN_Garment:add_text("Garment Factory")
+
+SN_Garment:add_button("Collect Safe", function()
+    V.safeValue = stats.get_int(MPX() .. "HDEN24_SAFE_CASH_VALUE")
+    if V.safeValue > 0 then
+        -- Collect safe logic
+        gui.show_message("Garment Factory", "Safe money collected: $" .. V.safeValue)
+    else
+        gui.show_message("Garment Factory", "Safe is empty")
+    end
+end)
+
+SN_Garment:add_button("Unbrick Computer", function()
+    stats.set_int(MPX() .. "HACKER24_GEN_BS", -24607)
+    gui.show_message("Garment Factory", "Computer unbricked")
+end)
+
+SN_Garment:add_button("Skip Setup", function()
+    stats.set_int(MPX() .. "HACKER24_GEN_BS", -1)
+    gui.show_message("Garment Factory", "Setup skipped. Change session to apply")
+end)
+
+-- Bail Office --
+local SN_BailOffice = SN_Business:add_tab("Bail Office ")
+
+SN_BailOffice:add_button("Collect Safe", function()
+    V.safeValue = stats.get_int(MPX() .. "BAIL_SAFE_CASH_VALUE")
+    if V.safeValue > 0 then
+        gui.show_message("Bail Office", "Safe money collected: $" .. V.safeValue)
+    else
+        gui.show_message("Bail Office", "Safe is empty")
+    end
+end)
+SN_BailOffice:add_button("All to Max Payout",
+function ()
+	stats.set_int(MPX() .. "BOUNTY24_STD_TARG_RWD_0", 90000)
+	stats.set_int(MPX() .. "BOUNTY24_STD_TARG_RWD_1", 90000)
+	stats.set_int(MPX() .. "BOUNTY24_STD_TARG_RWD_2", 90000)
+end)
+SN_BailOffice:add_button("Free All Prisoners", function()
+    stats.set_int(MPX() .. "BAIL_PRISONER_POSIX0", 0)
+    stats.set_int(MPX() .. "BAIL_PRISONER_POSIX1", 0)
+    stats.set_int(MPX() .. "BAIL_PRISONER_POSIX2", 0)
+    gui.show_message("Bail Office", "All prisoners freed")
+end)
+SN_BailOffice:add_text("Note: Do that outside Bail Office")
 
 -- Money Tool --
 local SN_MoneyT = Silent:add_tab("Money Tool ")
